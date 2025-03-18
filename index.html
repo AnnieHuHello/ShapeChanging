@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Panel</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: row;
+            min-height: 100vh;
+            background-color: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        #canvas-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            min-width: 800px;
+            max-width: calc(100vw - 340px);
+            overflow: visible;
+        }
+        #canvas-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 600px;
+            overflow: visible;
+            position: relative;
+            background-color: #2a2a2a;
+            border-radius: 4px;
+        }
+        canvas {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .controls {
+            background-color: #2a2a2a;
+            padding: 20px;
+            width: 300px;
+            height: 100vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+        .slider-container {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 5px 0;
+        }
+        .value-display {
+            display: inline-block;
+            min-width: 40px;
+            text-align: right;
+        }
+        .replicate-controls {
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #4CAF50;
+            border-radius: 4px;
+        }
+        .button-container {
+            margin: 15px 0;
+            text-align: center;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .shape-selector {
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #4CAF50;
+            border-radius: 4px;
+        }
+        .shape-option {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            background-color: #3a3a3a;
+            border: 1px solid #4CAF50;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+        }
+        .shape-option:hover {
+            background-color: #4a4a4a;
+        }
+        .shape-option.active {
+            background-color: #4CAF50;
+        }
+        .animation-controls {
+            background-color: #2a2a2a;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 4px;
+            border: 1px solid #4CAF50;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #3a3a3a;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <div class="shape-selector">
+            <h3>Shape Type</h3>
+            <button class="shape-option active" data-shape="star">Star</button>
+            <button class="shape-option" data-shape="circle">Circle</button>
+            <button class="shape-option" data-shape="square">Square</button>
+            <button class="shape-option" data-shape="triangle">Triangle</button>
+            <button class="shape-option" data-shape="diamond">Diamond</button>
+        </div>
+        <div class="slider-container">
+            <label>Size: <span class="value-display" id="size-value">50</span></label>
+            <input type="range" id="size-slider" min="10" max="100" value="50">
+        </div>
+        <div class="slider-container">
+            <label>Rotation: <span class="value-display" id="rotation-value">0</span></label>
+            <input type="range" id="rotation-slider" min="0" max="360" value="0">
+        </div>
+        <div class="slider-container">
+            <label>Scale X: <span class="value-display" id="scaleX-value">1</span></label>
+            <input type="range" id="scaleX-slider" min="0.1" max="2" step="0.1" value="1">
+        </div>
+        <div class="slider-container">
+            <label>Scale Y: <span class="value-display" id="scaleY-value">1</span></label>
+            <input type="range" id="scaleY-slider" min="0.1" max="2" step="0.1" value="1">
+        </div>
+        <div class="slider-container">
+            <label>Red: <span class="value-display" id="red-value">255</span></label>
+            <input type="range" id="red-slider" min="0" max="255" value="255">
+        </div>
+        <div class="slider-container">
+            <label>Green: <span class="value-display" id="green-value">255</span></label>
+            <input type="range" id="green-slider" min="0" max="255" value="255">
+        </div>
+        <div class="slider-container">
+            <label>Blue: <span class="value-display" id="blue-value">255</span></label>
+            <input type="range" id="blue-slider" min="0" max="255" value="255">
+        </div>
+        <div class="replicate-controls">
+            <div class="slider-container">
+                <label>Horizontal Copies: <span class="value-display" id="h-copies-value">1</span></label>
+                <input type="range" id="h-copies-slider" min="1" max="10" value="1">
+            </div>
+            <div class="slider-container">
+                <label>Vertical Copies: <span class="value-display" id="v-copies-value">1</span></label>
+                <input type="range" id="v-copies-slider" min="1" max="10" value="1">
+            </div>
+            <div class="slider-container">
+                <label>Spacing: <span class="value-display" id="spacing-value">100</span></label>
+                <input type="range" id="spacing-slider" min="20" max="200" value="100">
+            </div>
+        </div>
+    </div>
+    <div id="canvas-container">
+        <div id="canvas-wrapper"></div>
+        <div class="animation-controls">
+            <h3>Animation Controls</h3>
+            <div class="slider-container">
+                <label>Auto Rotate Speed: <span class="value-display" id="rotate-speed-value">0</span></label>
+                <input type="range" id="rotate-speed-slider" min="0" max="5" step="0.1" value="0">
+            </div>
+            <div class="slider-container">
+                <label>Random Movement Speed: <span class="value-display" id="move-speed-value">0</span></label>
+                <input type="range" id="move-speed-slider" min="0" max="5" step="0.1" value="0">
+            </div>
+            <div class="slider-container">
+                <label>Movement Range: <span class="value-display" id="move-range-value">100</span></label>
+                <input type="range" id="move-range-slider" min="0" max="200" value="100">
+            </div>
+        </div>
+    </div>
+    <script src="testPanel.js"></script>
+</body>
+</html> 
